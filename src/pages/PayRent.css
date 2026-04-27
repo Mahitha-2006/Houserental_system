@@ -1,0 +1,50 @@
+.payrent-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 25px;
+}
+
+.payrent-container h1 {
+  color: #ff385c;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.payrent-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.payrent-form input,
+.payrent-form select,
+.payrent-form textarea {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.25);
+  font-size: 1rem;
+  background: #fff;
+  outline: none;
+}
+
+.payrent-form textarea {
+  height: 120px;
+  resize: none;
+}
+
+.pay-btn {
+  background: #34c759;
+  color: white;
+  padding: 12px;
+  border: none;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s linear;
+}
+
+.pay-btn:hover {
+  background: #28a745;
+}

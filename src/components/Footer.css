@@ -1,0 +1,400 @@
+/* Footer.css */
+.footer {
+  background-color: #f7f7f7;
+  color: #222222;
+  margin-top: 60px;
+  border-top: 1px solid #dddddd;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Main Footer */
+.footer-main {
+  padding: 60px 0 40px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+  gap: 40px;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #222222;
+  position: relative;
+}
+
+.footer-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  width: 40px;
+  height: 2px;
+  background-color: #ff385c;
+}
+
+.footer-description {
+  color: #717171;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* Contact Info */
+.contact-info {
+  margin-bottom: 20px;
+}
+
+.contact-info p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: #717171;
+  font-size: 14px;
+}
+
+.contact-icon {
+  color: #ff385c;
+  font-size: 16px;
+  min-width: 20px;
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  gap: 15px;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: white;
+  border-radius: 50%;
+  color: #717171;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.social-links a:hover {
+  background-color: #ff385c;
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(255,56,92,0.3);
+}
+
+/* Footer Links */
+.footer-links {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: #717171;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+  display: inline-block;
+}
+
+.footer-links a:hover {
+  color: #ff385c;
+  transform: translateX(5px);
+}
+
+/* App Section */
+.app-text {
+  color: #717171;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.app-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.app-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #222222;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  width: fit-content;
+}
+
+.app-button:hover {
+  background-color: #ff385c;
+}
+
+.app-icon {
+  font-size: 24px;
+}
+
+.app-button-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-button-text span {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.app-button-text strong {
+  font-size: 14px;
+}
+
+/* Newsletter */
+.newsletter-text {
+  color: #717171;
+  font-size: 14px;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.newsletter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.newsletter-input {
+  padding: 12px;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.newsletter-input:focus {
+  border-color: #ff385c;
+}
+
+.newsletter-button {
+  padding: 12px;
+  background-color: #ff385c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.newsletter-button:hover {
+  background-color: #e31c5f;
+}
+
+/* Trust Badges */
+.trust-badges {
+  background-color: white;
+  padding: 30px 0;
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+}
+
+.badge-item img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.badge-item span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #222222;
+}
+
+/* Payment Methods */
+.payment-methods {
+  background-color: white;
+  padding: 20px 0;
+  border-bottom: 1px solid #dddddd;
+}
+
+.payment-grid {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.payment-grid span {
+  color: #717171;
+  font-size: 14px;
+}
+
+.payment-icon {
+  font-size: 30px;
+  color: #222222;
+  transition: color 0.3s ease;
+}
+
+.payment-icon:hover {
+  color: #ff385c;
+}
+
+/* Bottom Footer */
+.footer-bottom {
+  padding: 20px 0;
+  background-color: white;
+}
+
+.footer-bottom-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.copyright {
+  color: #717171;
+  font-size: 14px;
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-bottom-links a {
+  color: #717171;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.footer-bottom-links a:hover {
+  color: #ff385c;
+}
+
+.language-currency {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-select {
+  padding: 8px 12px;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  background-color: white;
+  color: #222222;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.footer-select:hover {
+  border-color: #ff385c;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-bottom-links {
+    justify-content: center;
+  }
+
+  .language-currency {
+    justify-content: center;
+  }
+
+  .app-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .badges-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-grid {
+    flex-wrap: wrap;
+  }
+
+  .footer-bottom-links {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .language-currency {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .footer-select {
+    width: 100%;
+  }
+}

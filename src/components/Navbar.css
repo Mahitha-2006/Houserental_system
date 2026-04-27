@@ -1,0 +1,528 @@
+/* MAIN NAVBAR WRAPPER */
+.nav-wrap {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+/* INNER NAVBAR CONTENT */
+.nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* BRAND LOGO + TEXT - LEFT SIDE */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.brand-text {
+  color: #ff385c;
+  font-weight: 700;
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+/* CENTER NAVIGATION LINKS */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-links a {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 6px;
+  transition: 0.2s;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.nav-links a:hover {
+  color: #ff385c;
+}
+
+.nav-links a.active {
+  color: #ff385c;
+  border-bottom: 2px solid #ff385c;
+}
+
+/* DROPDOWN MENU */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.drop-btn {
+  cursor: pointer;
+  padding: 8px 6px;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 38px;
+  left: 0;
+  background: #fff;
+  min-width: 180px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 300;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 14px;
+  color: #333;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.dropdown-menu a:hover {
+  background: #f7f7f7;
+  color: #ff385c;
+}
+
+/* Desktop Hover */
+@media (min-width: 901px) {
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+}
+
+/* RIGHT SIDE - Profile and Buttons - TOP RIGHT CORNER */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* PROFILE SECTION */
+.profile-section {
+  display: flex;
+  align-items: center;
+}
+
+.profile-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  background: #f7f7f7;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 40px;
+  cursor: pointer;
+  transition: 0.2s;
+  height: 44px;
+}
+
+.profile-btn:hover {
+  background: #fff;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
+}
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  background: #ff385c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.profile-name {
+  font-weight: 500;
+  color: #333;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.profile-arrow {
+  font-size: 0.7rem;
+  color: #666;
+}
+
+/* Profile Dropdown Menu */
+.profile-menu {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: #fff;
+  min-width: 240px;
+  border-radius: 12px;
+  box-shadow: 0px 8px 24px rgba(0,0,0,0.15);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.profile-dropdown:hover .profile-menu {
+  display: block;
+}
+
+.profile-header {
+  padding: 16px;
+  background: #f7f7f7;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.profile-header h4 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: #333;
+  font-weight: 600;
+}
+
+.profile-header p {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  transition: 0.2s;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.profile-menu-item:last-child {
+  border-bottom: none;
+}
+
+.profile-menu-item:hover {
+  background: #f7f7f7;
+  color: #ff385c;
+}
+
+.profile-menu-item span {
+  font-size: 1.2rem;
+  width: 24px;
+}
+
+.profile-menu-item.logout {
+  color: #dc3545;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.profile-menu-item.logout:hover {
+  background: #fff5f5;
+  color: #dc3545;
+}
+
+/* BUTTONS CONTAINER */
+.nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-login,
+.btn-register,
+.btn-payrent {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  height: 40px;
+}
+
+.btn-payrent {
+  background: #34c759;
+  color: white;
+}
+
+.btn-payrent:hover {
+  background: #28a745;
+}
+
+.btn-login {
+  background: #007bff;
+  color: white;
+}
+
+.btn-login:hover {
+  background: #0067d4;
+}
+
+.btn-register {
+  background: #ff385c;
+  color: white;
+}
+
+.btn-register:hover {
+  background: #e32f51;
+}
+
+/* MOBILE MENU ICON */
+.mobile-menu {
+  display: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #333;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+/* Desktop Large */
+@media (min-width: 1200px) {
+  .nav-links {
+    gap: 32px;
+  }
+}
+
+/* Desktop Medium */
+@media (min-width: 901px) and (max-width: 1199px) {
+  .nav-links {
+    gap: 16px;
+  }
+  
+  .profile-name {
+    max-width: 60px;
+  }
+}
+
+/* Mobile Breakpoint */
+@media (max-width: 900px) {
+  .nav-inner {
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .mobile-menu {
+    display: block;
+    order: 3;
+  }
+
+  .brand {
+    order: 1;
+  }
+
+  .nav-right {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 68px;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    gap: 8px;
+    z-index: 99;
+    transform: none;
+    left: 0;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a,
+  .dropdown {
+    width: 100%;
+  }
+
+  .dropdown {
+    width: 100%;
+  }
+
+  .drop-btn {
+    width: 100%;
+    justify-content: space-between;
+    padding: 12px 6px;
+  }
+
+  .dropdown-menu {
+    position: static;
+    box-shadow: none;
+    border-radius: 0;
+    border: none;
+    background: #f8f9fa;
+    margin-top: 5px;
+    width: 100%;
+  }
+
+  .dropdown.open .dropdown-menu {
+    display: block;
+  }
+
+  /* Mobile right section */
+  .nav-right {
+    gap: 8px;
+  }
+
+  .profile-btn {
+    padding: 4px 8px 4px 4px;
+  }
+
+  .profile-name {
+    max-width: 50px;
+    font-size: 0.85rem;
+  }
+
+  .nav-buttons {
+    gap: 4px;
+  }
+
+  .btn-login,
+  .btn-register,
+  .btn-payrent {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    height: 36px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .nav-inner {
+    padding: 8px 16px;
+  }
+
+  .brand-text {
+    font-size: 1rem;
+  }
+
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nav-right {
+    gap: 4px;
+  }
+
+  .profile-btn {
+    padding: 4px 6px 4px 4px;
+  }
+
+  .profile-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .profile-name {
+    max-width: 40px;
+    font-size: 0.8rem;
+  }
+
+  .nav-buttons {
+    gap: 2px;
+  }
+
+  .btn-login,
+  .btn-register,
+  .btn-payrent {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    height: 32px;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-menu,
+.profile-menu {
+  animation: fadeIn 0.2s ease;
+}
+
+/* Arrow on profile menu */
+.profile-menu::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  transform: rotate(45deg);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  border-left: 1px solid rgba(0,0,0,0.06);
+}
+
+@media (max-width: 900px) {
+  .profile-menu::before {
+    display: none;
+  }
+}

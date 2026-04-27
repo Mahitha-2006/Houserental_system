@@ -1,0 +1,64 @@
+/* reuse same design as login */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 72px);
+  background: linear-gradient(120deg, #f8faff, #f0f3ff);
+}
+
+.auth-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  width: 360px;
+}
+
+.auth-box h2 {
+  color: #ff385c;
+  margin-bottom: 8px;
+}
+
+.auth-box p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-form input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.auth-btn {
+  background: #ff385c;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-btn:hover {
+  background: #d92f52;
+}
+
+.auth-switch {
+  margin-top: 18px;
+  font-size: 0.95rem;
+}
+
+.auth-switch a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+}
