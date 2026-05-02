@@ -78,6 +78,7 @@
   background: #ddd;
   outline: none;
   -webkit-appearance: none;
+  appearance: none;   /* ← ADD THIS LINE */
 }
 
 .price-filter input[type="range"]::-webkit-slider-thumb {
