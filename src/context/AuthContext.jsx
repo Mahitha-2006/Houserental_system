@@ -2,151 +2,79 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
-const API_URL = 'http://localhost:5000';
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+    // Load user from localStorage on app start
     const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
+    const userData = localStorage.getItem('user');
     
-    if (token && savedUser) {
+    if (token && userData) {
       try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
         setIsAuthenticated(true);
-        
-        // Verify token with backend
-        const response = await fetch(`${API_URL}/users/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (response.ok) {
-          const freshUser = await response.json();
-          setUser(freshUser);
-          localStorage.setItem('user', JSON.stringify(freshUser));
-        } else {
-          // Token invalid
-          logout();
-        }
       } catch (error) {
-        console.error('Auth check error:', error);
-        logout();
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       }
     }
     setLoading(false);
-  };
+  }, []);
 
-  const login = async (email, password) => {
-    try {
-      const response = await fetch(`${API_URL}/users/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setUser(data.user);
-      setIsAuthenticated(true);
-      
-      return { success: true, user: data.user };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
-
-  const register = async (userData) => {
-    try {
-      const response = await fetch(`${API_URL}/users/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setUser(data.user);
-      setIsAuthenticated(true);
-      
-      return { success: true, user: data.user };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+  const login = (userData, token) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   const updateProfile = async (updatedData) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/users/update`, {
+      const response = await fetch('http://localhost:5000/users/update', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(updatedData)
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Update failed');
+      if (response.ok) {
+        const data = await response.json();
+        const updatedUser = { ...user, ...updatedData };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return { success: true };
+      } else {
+        const error = await response.json();
+        return { success: false, error: error.error };
       }
-
-      setUser(data.user);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      return { success: true, user: data.user };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Update profile error:', error);
+      return { success: false, error: 'Network error' };
     }
   };
 
   const value = {
     user,
-    loading,
     isAuthenticated,
+    loading,
     login,
-    register,
     logout,
     updateProfile
   };

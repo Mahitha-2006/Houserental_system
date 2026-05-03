@@ -234,15 +234,37 @@ const styles = {
   }
 };
 
+// Add hover styles
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
-  .dropdown-item:hover { background-color: #F7F7F7; }
-  .help-button:hover { color: #717171; }
-  .nav-link:hover { color: #717171; }
-  .profile-link:hover { background-color: #F7F7F7; border-color: #222; }
-  .signup-btn:hover { background-color: #444; }
-  .login-btn:hover { color: #FF385C; }
-  .logout-btn:hover { background-color: #dc2626; }
+  .dropdown-item:hover {
+    background-color: #F7F7F7;
+  }
+  
+  .help-button:hover {
+    color: #717171;
+  }
+  
+  .nav-link:hover {
+    color: #717171;
+  }
+  
+  .profile-link:hover {
+    background-color: #F7F7F7;
+    border-color: #222;
+  }
+  
+  .signup-btn:hover {
+    background-color: #444;
+  }
+  
+  .login-btn:hover {
+    color: #FF385C;
+  }
+  
+  .logout-btn:hover {
+    background-color: #dc2626;
+  }
 `;
 document.head.appendChild(styleSheet);
 

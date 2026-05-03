@@ -21,6 +21,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import path from 'path';
 import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
 
 // Import models
 import Property from "./models/Properties.js";
@@ -35,6 +36,23 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key_change_this_in_production';
+
+// Email transporter configuration
+const emailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || 'your-email@gmail.com',
+    pass: process.env.EMAIL_PASS || 'your-app-password'
+  }
+});
+
+// Store OTPs temporarily (in production, use Redis or database)
+const otpStore = new Map();
+
+// Generate random OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 // Middleware
 app.use(cors({
@@ -145,6 +163,123 @@ app.get("/test", (req, res) => {
     timestamp: new Date().toISOString(),
     mongodbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
+});
+
+// Debug cities endpoint
+app.get("/debug/cities", checkDBConnection, async (req, res) => {
+  try {
+    const cities = await Property.distinct('city');
+    const cityCounts = {};
+    for (const city of cities) {
+      const count = await Property.countDocuments({ city });
+      cityCounts[city] = count;
+    }
+    res.json({ 
+      success: true,
+      cities: cities,
+      cityCounts: cityCounts,
+      totalProperties: await Property.countDocuments()
+    });
+  } catch (err) {
+    console.error("Debug cities error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ================ OTP VERIFICATION ROUTES ================
+
+// Send OTP to email
+app.post("/api/send-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already registered" });
+    }
+    
+    const otp = generateOTP();
+    
+    // Store OTP with expiration (10 minutes)
+    otpStore.set(email, {
+      otp: otp,
+      expiresAt: Date.now() + 10 * 60 * 1000
+    });
+    
+    // Send email
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'your-email@gmail.com',
+      to: email,
+      subject: 'Email Verification - RentEase',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: #ff385c;">RentEase</h1>
+          </div>
+          <h2 style="color: #333;">Email Verification</h2>
+          <p>Hello,</p>
+          <p>Thank you for signing up with RentEase! Please use the following OTP to verify your email address:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <div style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #ff385c; background: #f5f5f5; padding: 15px; border-radius: 8px; display: inline-block;">
+              ${otp}
+            </div>
+          </div>
+          <p>This OTP is valid for <strong>10 minutes</strong>.</p>
+          <p>If you didn't request this, please ignore this email.</p>
+          <hr style="margin: 20px 0;" />
+          <p style="color: #888; font-size: 12px;">This is an automated message, please do not reply.</p>
+        </div>
+      `
+    };
+    
+    await emailTransporter.sendMail(mailOptions);
+    
+    res.json({ success: true, message: "OTP sent to your email" });
+    
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    res.status(500).json({ error: "Failed to send OTP. Please try again." });
+  }
+});
+
+// Verify OTP
+app.post("/api/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP are required" });
+    }
+    
+    const storedData = otpStore.get(email);
+    
+    if (!storedData) {
+      return res.status(400).json({ error: "OTP expired or not found. Please request a new OTP." });
+    }
+    
+    if (storedData.expiresAt < Date.now()) {
+      otpStore.delete(email);
+      return res.status(400).json({ error: "OTP has expired. Please request a new OTP." });
+    }
+    
+    if (storedData.otp !== otp) {
+      return res.status(400).json({ error: "Invalid OTP. Please try again." });
+    }
+    
+    // OTP verified successfully
+    otpStore.delete(email);
+    
+    res.json({ success: true, message: "Email verified successfully" });
+    
+  } catch (error) {
+    console.error("Verify OTP error:", error);
+    res.status(500).json({ error: "Failed to verify OTP" });
+  }
 });
 
 // ================ USER AUTHENTICATION ROUTES ================
@@ -299,61 +434,67 @@ app.put("/users/update", authenticateToken, async (req, res) => {
 
 // ================ PROPERTY ROUTES ================
 
-// DEBUG endpoint
-app.get("/debug/all-properties", checkDBConnection, async (req, res) => {
-  try {
-    const allProperties = await Property.find({}).lean();
-    const cities = [...new Set(allProperties.map(p => p.city))];
-    const cityCounts = {};
-    allProperties.forEach(p => {
-      cityCounts[p.city] = (cityCounts[p.city] || 0) + 1;
-    });
-    
-    res.json({
-      success: true,
-      total: allProperties.length,
-      cities: cities,
-      cityCounts: cityCounts,
-      properties: allProperties.map(p => ({ 
-        id: p._id,
-        title: p.title, 
-        city: p.city, 
-        type: p.type,
-        price: p.price
-      }))
-    });
-  } catch (err) {
-    console.error("Debug endpoint error:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET all properties
+// GET all properties (with city filter)
 app.get("/properties", checkDBConnection, async (req, res) => {
   try {
-    const { city, limit = 50, page = 1 } = req.query;
+    const { city, limit = 50, page = 1, minPrice, maxPrice, bedrooms, type, sortBy, order } = req.query;
     let query = {};
     
+    // City filter logic
     if (city) {
-      if (city.toLowerCase() === 'goa') {
+      const cityLower = city.toLowerCase();
+      if (cityLower === 'goa') {
         query.city = { 
           $in: ["Goa", "Assagao", "Vagator", "Anjuna", "Candolim", "Calangute", 
                 "Baga", "Nerul", "Saligao", "Siolim", "Mandrem", "Canacona", 
                 "Siridao", "Verla Canca", "North Goa", "South Goa"]
         };
-      } else if (city.toLowerCase() === 'bengaluru') {
+      } else if (cityLower === 'bengaluru' || cityLower === 'bangalore') {
         query.city = { 
-          $in: ["Bengaluru", "Krishnagiri"]
+          $in: ["Bengaluru", "Bangalore", "Krishnagiri"]
+        };
+      } else if (cityLower === 'vizag') {
+        query.city = { 
+          $in: ["Visakhapatnam", "Vizag"]
         };
       } else {
         query.city = { $regex: new RegExp(`^${city}$`, 'i') };
       }
     }
     
+    // Price filter
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseInt(minPrice);
+      if (maxPrice) query.price.$lte = parseInt(maxPrice);
+    }
+    
+    // Bedrooms filter
+    if (bedrooms) {
+      query.bedrooms = { $gte: parseInt(bedrooms) };
+    }
+    
+    // Type filter
+    if (type) {
+      query.type = type;
+    }
+    
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
+    // Sort options
+    let sortOptions = { createdAt: -1 };
+    if (sortBy === 'price') {
+      sortOptions = { price: order === 'asc' ? 1 : -1 };
+    } else if (sortBy === 'rating') {
+      sortOptions = { rating: -1 };
+    } else if (sortBy === 'reviewCount') {
+      sortOptions = { reviewCount: -1 };
+    } else if (sortBy === 'createdAt') {
+      sortOptions = { createdAt: -1 };
+    }
+    
     const [properties, total] = await Promise.all([
-      Property.find(query).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).lean(),
+      Property.find(query).sort(sortOptions).skip(skip).limit(parseInt(limit)).lean(),
       Property.countDocuments(query)
     ]);
     
@@ -368,6 +509,34 @@ app.get("/properties", checkDBConnection, async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching properties:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET cities list for a city (property types)
+app.get("/cities/:city/types", checkDBConnection, async (req, res) => {
+  try {
+    const { city } = req.params;
+    let query = {};
+    
+    if (city.toLowerCase() === 'goa') {
+      query.city = { 
+        $in: ["Goa", "Assagao", "Vagator", "Anjuna", "Candolim", "Calangute", 
+              "Baga", "Nerul", "Saligao", "Siolim", "Mandrem", "Canacona", 
+              "Siridao", "Verla Canca", "North Goa", "South Goa"]
+      };
+    } else {
+      query.city = { $regex: new RegExp(`^${city}$`, 'i') };
+    }
+    
+    const types = await Property.aggregate([
+      { $match: query },
+      { $group: { _id: "$type", count: { $sum: 1 } } }
+    ]);
+    
+    res.json(types);
+  } catch (err) {
+    console.error("Error fetching property types:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -555,6 +724,35 @@ app.put("/api/bookings/:id/cancel", authenticateToken, async (req, res) => {
   }
 });
 
+// ================ DEBUG ENDPOINTS ================
+app.get("/debug/all-properties", checkDBConnection, async (req, res) => {
+  try {
+    const allProperties = await Property.find({}).lean();
+    const cities = [...new Set(allProperties.map(p => p.city))];
+    const cityCounts = {};
+    allProperties.forEach(p => {
+      cityCounts[p.city] = (cityCounts[p.city] || 0) + 1;
+    });
+    
+    res.json({
+      success: true,
+      total: allProperties.length,
+      cities: cities,
+      cityCounts: cityCounts,
+      properties: allProperties.map(p => ({ 
+        id: p._id,
+        title: p.title, 
+        city: p.city, 
+        type: p.type,
+        price: p.price
+      }))
+    });
+  } catch (err) {
+    console.error("Debug endpoint error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.url} not found` });
@@ -572,10 +770,21 @@ app.listen(PORT, () => {
   console.log(`📝 Available endpoints:`);
   console.log(`   GET  /                           - API Info`);
   console.log(`   GET  /test                       - Test Server`);
+  console.log(`   GET  /debug/cities               - List all cities in DB`);
+  console.log(`   GET  /debug/all-properties       - Debug all properties`);
+  console.log(`   POST /api/send-otp               - Send OTP for email verification`);
+  console.log(`   POST /api/verify-otp             - Verify OTP`);
   console.log(`   POST /users/register             - Register new user`);
   console.log(`   POST /users/login                - Login user`);
-  console.log(`   GET  /properties                 - All Properties`);
-  console.log(`   POST /properties/create          - Create Property`);
-  console.log(`   DELETE /properties/:id           - Delete Property`);
-  console.log(`   PATCH /properties/:id/status     - Update Property Status`);
+  console.log(`   GET  /users/me                   - Get current user (Protected)`);
+  console.log(`   PUT  /users/update               - Update profile (Protected)`);
+  console.log(`   GET  /properties                 - All Properties (with filters)`);
+  console.log(`   GET  /properties/:id             - Single Property`);
+  console.log(`   GET  /cities/:city/types         - Property types for city`);
+  console.log(`   POST /properties/create          - Create Property (Protected)`);
+  console.log(`   DELETE /properties/:id           - Delete Property (Protected)`);
+  console.log(`   PATCH /properties/:id/status     - Update Property Status (Protected)`);
+  console.log(`   POST /api/bookings               - Create Booking (Protected)`);
+  console.log(`   GET  /api/bookings/my-bookings   - Get User Bookings (Protected)`);
+  console.log(`   PUT  /api/bookings/:id/cancel    - Cancel Booking (Protected)`);
 });

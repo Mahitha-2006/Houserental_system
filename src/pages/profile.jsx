@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaUser, FaEnvelope, FaPhone, FaUserCircle, FaEdit, FaSave, FaTimes, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
 
+const API_URL = 'http://localhost:5000';
+
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, logout, updateProfile, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -16,6 +18,7 @@ const Profile = () => {
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [localUser, setLocalUser] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -23,7 +26,21 @@ const Profile = () => {
       return;
     }
     
-    if (user) {
+    // Get user from localStorage directly
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const parsedUser = JSON.parse(userStr);
+        setLocalUser(parsedUser);
+        setFormData({
+          fullName: parsedUser.fullName || '',
+          mobile: parsedUser.mobile || ''
+        });
+      } catch (e) {
+        console.error('Error parsing user:', e);
+      }
+    } else if (user) {
+      setLocalUser(user);
       setFormData({
         fullName: user.fullName || '',
         mobile: user.mobile || ''
@@ -65,23 +82,50 @@ const Profile = () => {
     setSaving(true);
     setErrorMessage('');
     
-    const result = await updateProfile(formData);
-    
-    if (result.success) {
-      setSuccessMessage('Profile updated successfully!');
-      setIsEditing(false);
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } else {
-      setErrorMessage(result.error);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/users/update`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          mobile: formData.mobile
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update user in localStorage
+        const updatedUser = { 
+          ...localUser, 
+          fullName: formData.fullName, 
+          mobile: formData.mobile 
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setLocalUser(updatedUser);
+        
+        setSuccessMessage('Profile updated successfully!');
+        setIsEditing(false);
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setErrorMessage(data.error || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setErrorMessage('Network error. Please try again.');
+    } finally {
+      setSaving(false);
     }
-    
-    setSaving(false);
   };
 
   const handleCancel = () => {
     setFormData({
-      fullName: user?.fullName || '',
-      mobile: user?.mobile || ''
+      fullName: localUser?.fullName || '',
+      mobile: localUser?.mobile || ''
     });
     setIsEditing(false);
     setErrors({});
@@ -101,14 +145,22 @@ const Profile = () => {
     );
   }
 
-  if (!user) {
-    return null;
+  if (!localUser && !user) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <p>No user data found. Please login again.</p>
+          <button onClick={() => navigate('/login')} style={styles.editButton}>Go to Login</button>
+        </div>
+      </div>
+    );
   }
+
+  const displayUser = localUser || user;
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        {/* Profile Header */}
         <div style={styles.header}>
           <div style={styles.avatarContainer}>
             <FaUserCircle style={styles.avatar} />
@@ -117,21 +169,14 @@ const Profile = () => {
           <p style={styles.subtitle}>Manage your account information</p>
         </div>
 
-        {/* Success Message */}
         {successMessage && (
-          <div style={styles.successMessage}>
-            ✓ {successMessage}
-          </div>
+          <div style={styles.successMessage}>✓ {successMessage}</div>
         )}
 
-        {/* Error Message */}
         {errorMessage && (
-          <div style={styles.errorMessage}>
-            ⚠️ {errorMessage}
-          </div>
+          <div style={styles.errorMessage}>⚠️ {errorMessage}</div>
         )}
 
-        {/* Profile Information */}
         <div style={styles.infoSection}>
           <div style={styles.infoRow}>
             <div style={styles.infoLabel}>
@@ -139,7 +184,7 @@ const Profile = () => {
               <span>Username</span>
             </div>
             <div style={styles.infoValue}>
-              {user.username}
+              {displayUser.username || 'Not set'}
             </div>
           </div>
 
@@ -149,7 +194,7 @@ const Profile = () => {
               <span>Email</span>
             </div>
             <div style={styles.infoValue}>
-              {user.email}
+              {displayUser.email || 'Not set'}
             </div>
           </div>
 
@@ -173,7 +218,7 @@ const Profile = () => {
               </div>
             ) : (
               <div style={styles.infoValue}>
-                {user.mobile}
+                {displayUser.mobile || 'Not provided'}
               </div>
             )}
           </div>
@@ -197,7 +242,7 @@ const Profile = () => {
               </div>
             ) : (
               <div style={styles.infoValue}>
-                {user.fullName}
+                {displayUser.fullName || 'Not provided'}
               </div>
             )}
           </div>
@@ -208,7 +253,7 @@ const Profile = () => {
               <span>Member Since</span>
             </div>
             <div style={styles.infoValue}>
-              {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+              {displayUser.createdAt ? new Date(displayUser.createdAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
@@ -217,36 +262,22 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div style={styles.buttonGroup}>
           {isEditing ? (
             <>
-              <button 
-                onClick={handleSave} 
-                style={{...styles.button, ...styles.saveButton}}
-                disabled={saving}
-              >
+              <button onClick={handleSave} style={{...styles.button, ...styles.saveButton}} disabled={saving}>
                 <FaSave /> {saving ? 'Saving...' : 'Save Changes'}
               </button>
-              <button 
-                onClick={handleCancel} 
-                style={{...styles.button, ...styles.cancelButton}}
-              >
+              <button onClick={handleCancel} style={{...styles.button, ...styles.cancelButton}}>
                 <FaTimes /> Cancel
               </button>
             </>
           ) : (
             <>
-              <button 
-                onClick={() => setIsEditing(true)} 
-                style={{...styles.button, ...styles.editButton}}
-              >
+              <button onClick={() => setIsEditing(true)} style={{...styles.button, ...styles.editButton}}>
                 <FaEdit /> Edit Profile
               </button>
-              <button 
-                onClick={handleLogout} 
-                style={{...styles.button, ...styles.logoutButton}}
-              >
+              <button onClick={handleLogout} style={{...styles.button, ...styles.logoutButton}}>
                 <FaSignOutAlt /> Logout
               </button>
             </>
@@ -413,7 +444,6 @@ const styles = {
   }
 };
 
-// Add CSS animation
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
   @keyframes spin {

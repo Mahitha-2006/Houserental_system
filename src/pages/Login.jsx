@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/fa';
 
+const API_URL = 'http://localhost:5000';
+
 const Login = () => {
+  const navigate = useNavigate();
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -50,13 +53,45 @@ const Login = () => {
     setLoading(true);
     setServerError('');
     
-    const result = await login(formData.email, formData.password);
-    
-    if (result.success) {
-      // Force a page reload to ensure Navbar updates
-      window.location.href = '/';
-    } else {
-      setServerError(result.error);
+    try {
+      const response = await fetch(`${API_URL}/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Create complete user object with all fields
+        const userData = {
+          id: data.user.id,
+          fullName: data.user.fullName,
+          username: data.user.username,
+          email: data.user.email,
+          mobile: data.user.mobile,
+          createdAt: data.user.createdAt || new Date().toISOString()
+        };
+        
+        // Store user data and token
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Call login function from AuthContext
+        login(userData, data.token);
+        
+        // Navigate to home
+        navigate('/');
+      } else {
+        setServerError(data.error || 'Invalid email or password');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setServerError('Network error. Please try again.');
+    } finally {
       setLoading(false);
     }
   };

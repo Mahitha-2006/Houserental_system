@@ -45,7 +45,7 @@ const VizagProperties = () => {
         ...(filters.type && { type: filters.type })
       });
       
-      const response = await fetch(`${API_URL}/properties/city/Vizag?${params}`);
+      const response = await fetch(`${API_URL}/properties?city=Visakhapatnam&${params}`);
       
       if (!response.ok) throw new Error('Failed to fetch properties');
       

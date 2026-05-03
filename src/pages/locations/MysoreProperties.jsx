@@ -47,7 +47,7 @@ const MysoreProperties = () => {
       
       console.log('Fetching with params:', params.toString());
       
-      const response = await fetch(`${API_URL}/properties/city/Mysore?${params}`);
+      const response = await fetch(`${API_URL}/properties?city=Mysore&${params}`);
       
       if (!response.ok) throw new Error('Failed to fetch properties');
       
