@@ -7,6 +7,9 @@ import './App.css';
 // Import Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import HowItWorks from './pages/help/HowItWorks';
+import HelpFAQ from './pages/help/HelpFAQ';
+import HelpContact from './pages/help/HelpContact';
 
 // Import Pages
 import Home from './pages/Home';
@@ -28,7 +31,7 @@ import TestPage from './pages/TestPage';
 import Booking from './pages/Booking';
 import MyBookings from './pages/MyBookings';
 import BookingSuccess from './pages/BookingSuccess';
-
+import MyListings from './pages/MyListings';
 
 // Import location pages
 import HyderabadProperties from './pages/locations/HyderabadProperties';
@@ -84,37 +87,47 @@ function AppContent() {
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-
-            <Route path="/booking" element={
-  <ProtectedRoute>
-    <Booking />
-  </ProtectedRoute>
-} />
-<Route path="/my-bookings" element={
-  <ProtectedRoute>
-    <MyBookings />
-  </ProtectedRoute>
-} />
-<Route path="/bookings/success" element={
-  <ProtectedRoute>
-    <BookingSuccess />
-  </ProtectedRoute>
-} />
             
-            {/* Protected Routes - Require Login */}
-            <Route path="/profile" element={
+            {/* Help Routes */}
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/faq" element={<HelpFAQ />} />
+            <Route path="/contact" element={<HelpContact />} />
+
+            {/* Booking Routes */}
+            <Route path="/booking" element={
               <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            <Route path="/create-listing" element={
-              <ProtectedRoute>
-                <CreateListing />
+                <Booking />
               </ProtectedRoute>
             } />
             <Route path="/my-bookings" element={
               <ProtectedRoute>
                 <MyBookings />
+              </ProtectedRoute>
+            } />
+            <Route path="/bookings/success" element={
+              <ProtectedRoute>
+                <BookingSuccess />
+              </ProtectedRoute>
+            } />
+            
+            {/* Create Listing Route - MOVED HERE */}
+            <Route path="/create-listing" element={
+              <ProtectedRoute>
+                <CreateListing />
+              </ProtectedRoute>
+            } />
+            
+            {/* MyListings Route */}
+            <Route path="/my-listings" element={
+              <ProtectedRoute>
+                <MyListings />
+              </ProtectedRoute>
+            } />
+            
+            {/* Protected Routes - Require Login */}
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } />
             <Route path="/my-rentals" element={

@@ -1,21 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaUserCircle, FaCalendarAlt, FaHeart } from 'react-icons/fa';
+import { FaUserCircle, FaCalendarAlt, FaHeart, FaQuestionCircle, FaChevronDown, FaListAlt, FaHome } from 'react-icons/fa';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  // Log for debugging
   useEffect(() => {
-    console.log('Navbar updated - isAuthenticated:', isAuthenticated, 'user:', user);
-  }, [isAuthenticated, user]);
+    const handleClickOutside = (event) => {
+      if (showHelpMenu && !event.target.closest('.help-menu')) {
+        setShowHelpMenu(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showHelpMenu]);
 
   return (
     <nav style={styles.navbar}>
@@ -26,12 +32,34 @@ const Navbar = () => {
         </Link>
         
         <div style={styles.navLinks}>
-          <Link to="/browse" style={styles.navLink}>Browse</Link>
+          <Link to="/browse" style={styles.navLink}>
+            <FaHome style={styles.navIcon} /> Browse
+          </Link>
+          
+          {/* Help Dropdown */}
+          <div className="help-menu" style={styles.dropdown}>
+            <button 
+              onClick={() => setShowHelpMenu(!showHelpMenu)} 
+              style={styles.helpButton}
+            >
+              <FaQuestionCircle style={styles.navIcon} /> Help <FaChevronDown style={styles.dropdownIcon} />
+            </button>
+            {showHelpMenu && (
+              <div style={styles.dropdownMenu}>
+                <Link to="/how-it-works" style={styles.dropdownItem}>How it works</Link>
+                <Link to="/faq" style={styles.dropdownItem}>FAQ</Link>
+                <Link to="/contact" style={styles.dropdownItem}>Contact us</Link>
+              </div>
+            )}
+          </div>
           
           {isAuthenticated && user ? (
             <>
               <Link to="/my-bookings" style={styles.navLink}>
                 <FaCalendarAlt style={styles.navIcon} /> Bookings
+              </Link>
+              <Link to="/my-listings" style={styles.navLink}>
+                <FaListAlt style={styles.navIcon} /> My Listings
               </Link>
               <Link to="/wishlist" style={styles.navLink}>
                 <FaHeart style={styles.navIcon} /> Wishlist
@@ -47,10 +75,10 @@ const Navbar = () => {
               </div>
             </>
           ) : (
-            <>
-              <Link to="/login" style={styles.loginLink}>Log in</Link>
-              <Link to="/register" style={styles.registerBtn}>Sign up</Link>
-            </>
+            <div style={styles.authContainer}>
+              <Link to="/register" style={styles.signupBtn}>Sign up</Link>
+              <Link to="/login" style={styles.loginBtn}>Log in</Link>
+            </div>
           )}
         </div>
       </div>
@@ -94,7 +122,8 @@ const styles = {
   navLinks: {
     display: 'flex',
     alignItems: 'center',
-    gap: '24px'
+    gap: '24px',
+    flexWrap: 'wrap'
   },
   navLink: {
     display: 'flex',
@@ -109,14 +138,12 @@ const styles = {
   navIcon: {
     fontSize: '14px'
   },
-  loginLink: {
-    color: '#222',
-    textDecoration: 'none',
-    fontSize: '14px',
-    fontWeight: '500',
-    padding: '8px 12px'
+  authContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
   },
-  registerBtn: {
+  signupBtn: {
     backgroundColor: '#222',
     color: 'white',
     padding: '8px 20px',
@@ -125,6 +152,54 @@ const styles = {
     fontSize: '14px',
     fontWeight: '500',
     transition: 'background-color 0.2s'
+  },
+  loginBtn: {
+    color: '#222',
+    textDecoration: 'none',
+    fontSize: '14px',
+    fontWeight: '500',
+    padding: '8px 12px'
+  },
+  dropdown: {
+    position: 'relative'
+  },
+  helpButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    background: 'none',
+    border: 'none',
+    color: '#222',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    padding: '8px 0'
+  },
+  dropdownIcon: {
+    fontSize: '10px',
+    marginLeft: '2px'
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'white',
+    border: '1px solid #EBEBEB',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    minWidth: '160px',
+    marginTop: '12px',
+    zIndex: 100,
+    overflow: 'hidden'
+  },
+  dropdownItem: {
+    display: 'block',
+    padding: '12px 20px',
+    color: '#222',
+    textDecoration: 'none',
+    fontSize: '14px',
+    transition: 'background 0.2s'
   },
   userMenu: {
     display: 'flex',
@@ -155,9 +230,20 @@ const styles = {
     borderRadius: '32px',
     cursor: 'pointer',
     fontSize: '13px',
-    fontWeight: '500',
-    transition: 'background-color 0.2s'
+    fontWeight: '500'
   }
 };
+
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  .dropdown-item:hover { background-color: #F7F7F7; }
+  .help-button:hover { color: #717171; }
+  .nav-link:hover { color: #717171; }
+  .profile-link:hover { background-color: #F7F7F7; border-color: #222; }
+  .signup-btn:hover { background-color: #444; }
+  .login-btn:hover { color: #FF385C; }
+  .logout-btn:hover { background-color: #dc2626; }
+`;
+document.head.appendChild(styleSheet);
 
 export default Navbar;

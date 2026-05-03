@@ -1,30 +1,552 @@
+/* ========================================
+   HELP PAGES - AIRBNB STYLE THEME
+   ======================================== */
+
+/* Global Reset for Help Pages */
 .help-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  min-height: calc(100vh - 200px);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+/* ========================================
+   HEADER SECTION
+   ======================================== */
+.help-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.help-header h1 {
+  font-size: 48px;
+  font-weight: 600;
+  color: #222222;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.help-header p {
+  font-size: 18px;
+  color: #717171;
+  line-height: 1.4;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   HOW IT WORKS PAGE - STEPS SECTION
+   ======================================== */
+.how-it-works-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  margin-bottom: 64px;
+}
+
+.step-card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px 24px;
+  text-align: center;
+  border: 1px solid #EBEBEB;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: transparent;
+}
+
+.step-number {
+  position: absolute;
+  top: -16px;
+  left: 24px;
+  width: 32px;
+  height: 32px;
+  background: #222222;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.step-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.step-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #222222;
+  margin-bottom: 12px;
+}
+
+.step-card p {
+  font-size: 15px;
+  color: #717171;
+  line-height: 1.5;
+}
+
+/* ========================================
+   TIPS SECTION
+   ======================================== */
+.tips-section {
+  background: #F7F7F7;
+  border-radius: 24px;
+  padding: 40px;
+  margin-bottom: 48px;
+}
+
+.tips-section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #222222;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.tip-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 40px;
+  font-size: 14px;
+  color: #222222;
+  border: 1px solid #EBEBEB;
+}
+
+.tip-icon {
+  font-size: 20px;
+}
+
+/* ========================================
+   CTA SECTION
+   ======================================== */
+.help-cta {
+  text-align: center;
+  background: linear-gradient(135deg, #222222 0%, #444444 100%);
+  border-radius: 24px;
+  padding: 48px 32px;
+  color: white;
+}
+
+.help-cta h2 {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.help-cta p {
+  font-size: 16px;
+  opacity: 0.85;
+  margin-bottom: 24px;
+}
+
+.help-contact-btn {
+  display: inline-block;
+  background: white;
+  color: #222222;
+  padding: 14px 32px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.help-contact-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ========================================
+   FAQ PAGE - ACCORDION STYLES
+   ======================================== */
+.faq-container {
   max-width: 800px;
-  margin: 40px auto;
-  padding: 20px;
+  margin: 0 auto;
 }
 
-.help-box {
-  background: #fff;
-  padding: 25px;
+.faq-item {
+  border-bottom: 1px solid #EBEBEB;
+  margin-bottom: 4px;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 24px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  color: #222222;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.faq-question:hover {
+  color: #FF385C;
+}
+
+.faq-icon {
+  font-size: 22px;
+  color: #FF385C;
+  font-weight: 300;
+}
+
+.faq-answer {
+  padding: 0 0 24px 0;
+  color: #717171;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* FAQ Search */
+.faq-search {
+  margin-bottom: 48px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.faq-search-input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid #DDDDDD;
+  border-radius: 48px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.faq-search-input:focus {
+  border-color: #222222;
+  box-shadow: 0 0 0 1px #222222;
+}
+
+/* ========================================
+   CONTACT PAGE - TWO COLUMN LAYOUT
+   ======================================== */
+.contact-container {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Contact Info Cards */
+.contact-info {
+  background: #F7F7F7;
+  border-radius: 24px;
+  padding: 32px;
+}
+
+.contact-info h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #222222;
+  margin-bottom: 28px;
+}
+
+.contact-method {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid #EBEBEB;
+  transition: transform 0.2s ease;
+}
+
+.contact-method:last-child {
+  border-bottom: none;
+}
+
+.contact-method:hover {
+  transform: translateX(4px);
+}
+
+.contact-icon {
+  font-size: 28px;
+}
+
+.contact-method h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222222;
+  margin-bottom: 4px;
+}
+
+.contact-method p {
+  font-size: 14px;
+  color: #222222;
+  font-weight: 500;
+}
+
+.contact-method small {
+  font-size: 12px;
+  color: #717171;
+}
+
+/* Contact Form */
+.contact-form {
+  background: white;
+  border: 1px solid #EBEBEB;
+  border-radius: 24px;
+  padding: 32px;
+}
+
+.contact-form h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #222222;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #222222;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #DDDDDD;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-size: 15px;
+  transition: all 0.2s ease;
+  outline: none;
+  font-family: inherit;
+  background: white;
 }
 
-.help-box h3 {
-  margin-bottom: 10px;
-  color: #ff385c;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #222222;
+  box-shadow: 0 0 0 1px #222222;
 }
 
-.help-box p {
-  font-size: 1rem;
-  margin: 8px 0;
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
-.info {
-  margin-top: 15px;
-  padding: 12px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  font-size: 0.95rem;
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: #FF385C;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.submit-btn:hover {
+  background: #D70466;
+}
+
+/* Success Message */
+.success-message {
+  background: #E8F5E9;
+  color: #2E7D32;
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* ========================================
+   COMMON COMPONENTS
+   ======================================== */
+/* Loading Spinner */
+.loading-spinner {
+  text-align: center;
+  padding: 80px;
+  font-size: 16px;
+  color: #717171;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.no-results h3 {
+  font-size: 24px;
+  color: #222222;
+  margin-bottom: 12px;
+}
+
+.no-results p {
+  color: #717171;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 1024px) {
+  .help-page {
+    padding: 32px 20px 64px;
+  }
+
+  .help-header h1 {
+    font-size: 40px;
+  }
+
+  .steps-grid {
+    gap: 24px;
+  }
+
+  .contact-container {
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .help-page {
+    padding: 24px 16px 48px;
+  }
+
+  .help-header {
+    margin-bottom: 40px;
+  }
+
+  .help-header h1 {
+    font-size: 32px;
+  }
+
+  .help-header p {
+    font-size: 16px;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .step-card {
+    padding: 28px 20px;
+  }
+
+  .step-card h3 {
+    font-size: 18px;
+  }
+
+  .tips-section {
+    padding: 24px;
+  }
+
+  .tips-section h2 {
+    font-size: 20px;
+  }
+
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .help-cta {
+    padding: 32px 24px;
+  }
+
+  .help-cta h2 {
+    font-size: 24px;
+  }
+
+  .contact-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .contact-info,
+  .contact-form {
+    padding: 24px;
+  }
+
+  .contact-info h2,
+  .contact-form h2 {
+    font-size: 20px;
+  }
+
+  .faq-question {
+    font-size: 16px;
+    padding: 18px 0;
+  }
+
+  .faq-answer {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .help-page {
+    padding: 20px 16px 40px;
+  }
+
+  .help-header h1 {
+    font-size: 28px;
+  }
+
+  .step-icon {
+    font-size: 40px;
+  }
+
+  .contact-method {
+    gap: 12px;
+    padding: 16px 0;
+  }
+
+  .contact-icon {
+    font-size: 24px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 12px 14px;
+  }
 }

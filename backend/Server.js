@@ -19,11 +19,16 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Import models
 import Property from "./models/Properties.js";
 import User from "./models/User.js";
 import Booking from "./models/Booking.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -39,16 +44,11 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 
 // Serve static images from assets folder
-import path from 'path';
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 app.use('/assets', express.static(path.join(__dirname, '../src/assets')));
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGO_URI || 'mongodb+srv://mahithakudaravalli04_db_user:tbteNJzFJe2wD55u@cluster2.r36tmvi.mongodb.net/rental-system?retryWrites=true&w=majority&appName=Cluster2';
 
-// Connection function with retry logic
 let isConnected = false;
 
 const connectDB = async () => {
@@ -65,19 +65,15 @@ const connectDB = async () => {
     });
     isConnected = true;
     console.log('✅ Connected to MongoDB Atlas');
-    console.log(`📊 Database: ${MONGODB_URI.substring(0, 50)}...`);
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
     isConnected = false;
-    console.log('Retrying connection in 10 seconds...');
     setTimeout(connectDB, 10000);
   }
 };
 
-// Initial connection
 connectDB();
 
-// Monitor connection
 mongoose.connection.on('error', err => {
   console.error('MongoDB error:', err);
   isConnected = false;
@@ -87,11 +83,6 @@ mongoose.connection.on('disconnected', () => {
   console.log('MongoDB disconnected - attempting to reconnect...');
   isConnected = false;
   connectDB();
-});
-
-mongoose.connection.on('reconnected', () => {
-  console.log('MongoDB reconnected');
-  isConnected = true;
 });
 
 mongoose.connection.on('connected', () => {
@@ -163,12 +154,10 @@ app.post("/users/register", async (req, res) => {
   try {
     const { fullName, username, email, mobile, password } = req.body;
     
-    // Validate required fields
     if (!fullName || !username || !email || !mobile || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
     
-    // Check if user already exists
     const existingUser = await User.findOne({ 
       $or: [{ email }, { username }] 
     });
@@ -182,7 +171,6 @@ app.post("/users/register", async (req, res) => {
       }
     }
     
-    // Create new user
     const user = new User({
       fullName,
       username,
@@ -193,14 +181,12 @@ app.post("/users/register", async (req, res) => {
     
     await user.save();
     
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, email: user.email, username: user.username },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
     
-    // Return user info without password
     const userResponse = {
       id: user._id,
       fullName: user.fullName,
@@ -226,31 +212,26 @@ app.post("/users/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Validate required fields
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
     
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     
-    // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, email: user.email, username: user.username },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
     
-    // Return user info without password
     const userResponse = {
       id: user._id,
       fullName: user.fullName,
@@ -271,7 +252,7 @@ app.post("/users/login", async (req, res) => {
   }
 });
 
-// Get current user profile (protected route)
+// Get current user profile
 app.get("/users/me", authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select('-password');
@@ -321,11 +302,7 @@ app.put("/users/update", authenticateToken, async (req, res) => {
 // DEBUG endpoint
 app.get("/debug/all-properties", checkDBConnection, async (req, res) => {
   try {
-    console.log("🔍 Debug endpoint called");
-    
     const allProperties = await Property.find({}).lean();
-    console.log(`Found ${allProperties.length} total properties`);
-    
     const cities = [...new Set(allProperties.map(p => p.city))];
     const cityCounts = {};
     allProperties.forEach(p => {
@@ -342,32 +319,19 @@ app.get("/debug/all-properties", checkDBConnection, async (req, res) => {
         title: p.title, 
         city: p.city, 
         type: p.type,
-        price: p.price,
-        rating: p.rating,
-        bedrooms: p.bedrooms
+        price: p.price
       }))
     });
   } catch (err) {
     console.error("Debug endpoint error:", err);
-    res.status(500).json({ error: err.message, stack: err.stack });
+    res.status(500).json({ error: err.message });
   }
 });
 
 // GET all properties
 app.get("/properties", checkDBConnection, async (req, res) => {
   try {
-    const { 
-      city, 
-      minPrice, 
-      maxPrice, 
-      bedrooms, 
-      type,
-      limit = 50,
-      page = 1,
-      sortBy = 'createdAt',
-      order = 'desc'
-    } = req.query;
-    
+    const { city, limit = 50, page = 1 } = req.query;
     let query = {};
     
     if (city) {
@@ -377,60 +341,21 @@ app.get("/properties", checkDBConnection, async (req, res) => {
                 "Baga", "Nerul", "Saligao", "Siolim", "Mandrem", "Canacona", 
                 "Siridao", "Verla Canca", "North Goa", "South Goa"]
         };
-      } else if (city.toLowerCase() === 'mumbai') {
-        query.city = { 
-          $in: ["Mumbai", "Navi Mumbai", "Panvel", "Alibaug", "Mumbai Suburban"]
-        };
       } else if (city.toLowerCase() === 'bengaluru') {
         query.city = { 
           $in: ["Bengaluru", "Krishnagiri"]
-        };
-      } else if (city.toLowerCase() === 'mysore') {
-        query.city = { 
-          $in: [
-            "Mysore", "Mysuru", "Siddapura", "Siddapur", "Coorg", "Kodagu",
-            "Jettihundi", "Kalalavadi", "Basavanahalli", "Kutta", "Madikeri",
-            "Kushalnagar", "Virajpet", "Somwarpet", "Gonikoppal",
-            "Kannur"
-          ]
-        };
-      } else if (city.toLowerCase() === 'vizag') {
-        query.city = { 
-          $in: ["Visakhapatnam", "Vizag", "Bheemili", "Kapuluppada", "Madhurawada"]
         };
       } else {
         query.city = { $regex: new RegExp(`^${city}$`, 'i') };
       }
     }
     
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = parseInt(minPrice);
-      if (maxPrice) query.price.$lte = parseInt(maxPrice);
-    }
-    
-    if (bedrooms) {
-      query.bedrooms = { $gte: parseInt(bedrooms) };
-    }
-    
-    if (type) {
-      query.type = type;
-    }
-    
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const sortOptions = {};
-    sortOptions[sortBy] = order === 'desc' ? -1 : 1;
     
     const [properties, total] = await Promise.all([
-      Property.find(query)
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(parseInt(limit))
-        .lean(),
+      Property.find(query).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).lean(),
       Property.countDocuments(query)
     ]);
-    
-    console.log(`📦 Fetched ${properties.length} properties for ${city || 'all'} (total: ${total})`);
     
     res.json({
       properties,
@@ -443,104 +368,6 @@ app.get("/properties", checkDBConnection, async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching properties:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET properties by city
-app.get("/properties/city/:city", checkDBConnection, async (req, res) => {
-  try {
-    const { city } = req.params;
-    const { 
-      minPrice, 
-      maxPrice, 
-      bedrooms, 
-      type,
-      limit = 50,
-      page = 1,
-      sortBy = 'rating',
-      order = 'desc'
-    } = req.query;
-    
-    let query = {};
-    
-    if (city.toLowerCase() === 'goa') {
-      query.city = { 
-        $in: ["Goa", "Assagao", "Vagator", "Anjuna", "Candolim", "Calangute", 
-              "Baga", "Nerul", "Saligao", "Siolim", "Mandrem", "Canacona", 
-              "Siridao", "Verla Canca", "North Goa", "South Goa"]
-      };
-    }
-    else if (city.toLowerCase() === 'mumbai') {
-      query.city = { 
-        $in: ["Mumbai", "Navi Mumbai", "Panvel", "Alibaug", "Mumbai Suburban"]
-      };
-    }
-    else if (city.toLowerCase() === 'bengaluru') {
-      query.city = { 
-        $in: ["Bengaluru", "Krishnagiri"]
-      };
-    }
-    else if (city.toLowerCase() === 'mysore') {
-      query.city = { 
-        $in: [
-          "Mysore", "Mysuru", "Siddapura", "Siddapur", "Coorg", "Kodagu",
-          "Jettihundi", "Kalalavadi", "Basavanahalli", "Kutta", "Madikeri",
-          "Kushalnagar", "Virajpet", "Somwarpet", "Gonikoppal",
-          "Kannur"
-        ]
-      };
-    }
-    else if (city.toLowerCase() === 'vizag') {
-      query.city = { 
-        $in: ["Visakhapatnam", "Vizag", "Bheemili", "Kapuluppada", "Madhurawada"]
-      };
-    }
-    else {
-      query.city = { $regex: new RegExp(`^${city}$`, 'i') };
-    }
-    
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = parseInt(minPrice);
-      if (maxPrice) query.price.$lte = parseInt(maxPrice);
-    }
-    
-    if (bedrooms) {
-      query.bedrooms = { $gte: parseInt(bedrooms) };
-    }
-    
-    if (type) {
-      query.type = type;
-    }
-    
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const sortOptions = {};
-    sortOptions[sortBy] = order === 'desc' ? -1 : 1;
-    
-    const [properties, total] = await Promise.all([
-      Property.find(query)
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(parseInt(limit))
-        .lean(),
-      Property.countDocuments(query)
-    ]);
-    
-    console.log(`📦 Fetched ${properties.length} properties for city: ${city} (total in DB: ${total})`);
-    
-    res.json({
-      city,
-      properties,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / parseInt(limit)),
-        totalProperties: total,
-        limit: parseInt(limit)
-      }
-    });
-  } catch (err) {
-    console.error("Error fetching properties by city:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -575,106 +402,128 @@ app.get("/properties/:id", checkDBConnection, async (req, res) => {
   }
 });
 
-// GET all cities with counts
-app.get("/cities", checkDBConnection, async (req, res) => {
-  try {
-    const cities = await Property.aggregate([
-      { $group: { _id: "$city", count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]);
-    
-    res.json(cities);
-  } catch (err) {
-    console.error("Error fetching cities:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET property types for a city
-app.get("/cities/:city/types", checkDBConnection, async (req, res) => {
-  try {
-    const { city } = req.params;
-    
-    let query = {};
-    
-    if (city.toLowerCase() === 'goa') {
-      query.city = { 
-        $in: ["Goa", "Assagao", "Vagator", "Anjuna", "Candolim", "Calangute", 
-              "Baga", "Nerul", "Saligao", "Siolim", "Mandrem", "Canacona", 
-              "Siridao", "Verla Canca", "North Goa", "South Goa"]
-      };
-    } else if (city.toLowerCase() === 'mumbai') {
-      query.city = { 
-        $in: ["Mumbai", "Navi Mumbai", "Panvel", "Alibaug", "Mumbai Suburban"]
-      };
-    } else if (city.toLowerCase() === 'bengaluru') {
-      query.city = { 
-        $in: ["Bengaluru", "Krishnagiri"]
-      };
-    } else if (city.toLowerCase() === 'mysore') {
-      query.city = { 
-        $in: [
-          "Mysore", "Mysuru", "Siddapura", "Siddapur", "Coorg", "Kodagu",
-          "Jettihundi", "Kalalavadi", "Basavanahalli", "Kutta", "Madikeri",
-          "Kushalnagar", "Virajpet", "Somwarpet", "Gonikoppal",
-          "Kannur"
-        ]
-      };
-    } else if (city.toLowerCase() === 'vizag') {
-      query.city = { 
-        $in: ["Visakhapatnam", "Vizag", "Bheemili", "Kapuluppada", "Madhurawada"]
-      };
-    } else {
-      query.city = { $regex: new RegExp(`^${city}$`, 'i') };
-    }
-    
-    const types = await Property.aggregate([
-      { $match: query },
-      { $group: { _id: "$type", count: { $sum: 1 } } }
-    ]);
-    
-    res.json(types);
-  } catch (err) {
-    console.error("Error fetching property types:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-// ================ BOOKING ROUTES ================
-
-// Create a new booking
-app.post("/api/bookings", authenticateToken, async (req, res) => {
+// ================ CREATE PROPERTY ================
+app.post("/properties/create", authenticateToken, async (req, res) => {
   try {
     const {
-      propertyId, propertyTitle, propertyImage, propertyLocation,
-      checkIn, checkOut, guests, bedrooms, bathrooms,
-      pricePerNight, totalPrice, cleaningFee, serviceFee,
-      paymentMethod, specialRequests, guestName, guestEmail, guestPhone
+      title, description, longDescription, type, location, city, state, country,
+      zipCode, address, coordinates, price, cleaningFee, serviceFee, securityDeposit,
+      weeklyDiscount, monthlyDiscount, bedrooms, beds, bathrooms, guests, squareFeet,
+      bedroomDetails, image, images, amenities, keyAmenities, houseRules, safetyFeatures,
+      cancellationPolicy, isAvailable, instantBook, selfCheckIn, tags, categories,
+      nearbyPlaces, highlights, languages
     } = req.body;
 
-    const booking = new Booking({
-      propertyId,
-      userId: req.user.userId,
-      propertyTitle,
-      propertyImage,
-      propertyLocation,
-      checkIn: new Date(checkIn),
-      checkOut: new Date(checkOut),
-      guests,
-      bedrooms,
-      bathrooms,
-      pricePerNight,
-      totalPrice,
-      cleaningFee: cleaningFee || 0,
-      serviceFee: serviceFee || 0,
-      paymentMethod,
-      specialRequests: specialRequests || '',
-      guestName,
-      guestEmail,
-      guestPhone,
-      status: 'confirmed',
-      paymentStatus: 'completed'
+    const currentUser = req.user;
+    
+    const owner = {
+      id: currentUser.userId,
+      name: currentUser.fullName || currentUser.username,
+      email: currentUser.email,
+      phone: "",
+      joinedSince: new Date().toISOString().split('T')[0],
+      profileImage: "/assets/images/owners/default.jpg",
+      bio: "Passionate host dedicated to providing exceptional stays.",
+      isVerified: true,
+      responseRate: 100,
+      responseTime: "within an hour",
+      languages: languages || ["English", "Hindi"]
+    };
+
+    const newProperty = new Property({
+      title, description, longDescription: longDescription || description,
+      type: type || "Apartment", location, city, state, country, zipCode, address,
+      coordinates: coordinates || { lat: 0, lng: 0 }, price,
+      cleaningFee: cleaningFee || 0, serviceFee: serviceFee || 0,
+      securityDeposit: securityDeposit || 0, weeklyDiscount: weeklyDiscount || 0,
+      monthlyDiscount: monthlyDiscount || 0, bedrooms, beds: beds || bedrooms, bathrooms, guests,
+      squareFeet: squareFeet || 1000, bedroomDetails: bedroomDetails || [],
+      image: image || "/assets/images/default-property.jpg",
+      images: images || [image || "/assets/images/default-property.jpg"],
+      rating: 0, reviewCount: 0, reviews: [],
+      ratingBreakdown: { cleanliness: 0, accuracy: 0, communication: 0, location: 0, checkIn: 0, value: 0 },
+      amenities: amenities || [], keyAmenities: keyAmenities || [],
+      houseRules: houseRules || { checkIn: "Flexible", checkOut: "11:00 AM", minStay: 1, maxStay: 90,
+        smoking: false, pets: false, parties: false, children: true,
+        quietHours: { start: "22:00", end: "08:00" } },
+      safetyFeatures: safetyFeatures || [], cancellationPolicy: cancellationPolicy || {
+        type: "Moderate", description: "Free cancellation within 48 hours of booking.",
+        fullRefundDays: 2, partialRefundDays: 1 },
+      owner: owner, isSuperhost: false,
+      isAvailable: isAvailable !== undefined ? isAvailable : true,
+      isGuestFavourite: false, isNew: true, instantBook: instantBook || false,
+      selfCheckIn: selfCheckIn || true, bookedDates: [], viewCount: 0, wishlistCount: 0,
+      tags: tags || [], categories: categories || ["Apartment", "Family", "Business"],
+      nearbyPlaces: nearbyPlaces || [], highlights: highlights || [],
+      languages: languages || ["English", "Hindi"], responseRate: 100,
+      responseTime: "within an hour", virtualTour: "", videoTour: "", __v: 0
     });
 
+    await newProperty.save();
+    res.status(201).json({ success: true, message: "Property created successfully!", property: newProperty });
+  } catch (err) {
+    console.error("Create property error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ================ DELETE PROPERTY ================
+app.delete("/properties/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid property ID format" });
+    }
+    
+    const property = await Property.findById(id);
+    
+    if (!property) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+    
+    await Property.findByIdAndDelete(id);
+    res.json({ success: true, message: "Property deleted successfully" });
+  } catch (err) {
+    console.error("Delete property error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ================ UPDATE PROPERTY STATUS ================
+app.patch("/properties/:id/status", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid property ID format" });
+    }
+    
+    if (!['active', 'inactive', 'pending'].includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+    
+    const property = await Property.findById(id);
+    
+    if (!property) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+    
+    property.status = status;
+    await property.save();
+    
+    res.json({ success: true, property });
+  } catch (err) {
+    console.error("Update property status error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ================ BOOKING ROUTES ================
+app.post("/api/bookings", authenticateToken, async (req, res) => {
+  try {
+    const booking = new Booking({ ...req.body, userId: req.user.userId });
     await booking.save();
     res.status(201).json({ success: true, booking });
   } catch (err) {
@@ -683,11 +532,9 @@ app.post("/api/bookings", authenticateToken, async (req, res) => {
   }
 });
 
-// Get user's bookings
 app.get("/api/bookings/my-bookings", authenticateToken, async (req, res) => {
   try {
-    const bookings = await Booking.find({ userId: req.user.userId })
-      .sort({ createdAt: -1 });
+    const bookings = await Booking.find({ userId: req.user.userId }).sort({ createdAt: -1 });
     res.json({ success: true, bookings });
   } catch (err) {
     console.error("Error fetching bookings:", err);
@@ -695,21 +542,12 @@ app.get("/api/bookings/my-bookings", authenticateToken, async (req, res) => {
   }
 });
 
-// Cancel a booking
 app.put("/api/bookings/:id/cancel", authenticateToken, async (req, res) => {
   try {
-    const booking = await Booking.findOne({ 
-      _id: req.params.id, 
-      userId: req.user.userId 
-    });
-    
-    if (!booking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
-    
+    const booking = await Booking.findOne({ _id: req.params.id, userId: req.user.userId });
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
     booking.status = 'cancelled';
     await booking.save();
-    
     res.json({ success: true, booking });
   } catch (err) {
     console.error("Cancel booking error:", err);
@@ -719,23 +557,7 @@ app.put("/api/bookings/:id/cancel", authenticateToken, async (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ 
-    error: `Route ${req.method} ${req.url} not found`,
-    availableEndpoints: [
-      "GET  /",
-      "GET  /test",
-      "POST /users/register",
-      "POST /users/login",
-      "GET  /users/me",
-      "PUT  /users/update",
-      "GET  /debug/all-properties",
-      "GET  /properties",
-      "GET  /properties/:id",
-      "GET  /properties/city/:city",
-      "GET  /cities",
-      "GET  /cities/:city/types"
-    ]
-  });
+  res.status(404).json({ error: `Route ${req.method} ${req.url} not found` });
 });
 
 // Error handler
@@ -747,19 +569,13 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`\n📝 Available endpoints:`);
+  console.log(`📝 Available endpoints:`);
   console.log(`   GET  /                           - API Info`);
   console.log(`   GET  /test                       - Test Server`);
-  console.log(`\n   🔐 User Authentication Routes:`);
   console.log(`   POST /users/register             - Register new user`);
   console.log(`   POST /users/login                - Login user`);
-  console.log(`   GET  /users/me                   - Get current user (Protected)`);
-  console.log(`   PUT  /users/update               - Update profile (Protected)`);
-  console.log(`\n   🏠 Property Routes:`);
-  console.log(`   GET  /debug/all-properties       - Debug all properties`);
   console.log(`   GET  /properties                 - All Properties`);
-  console.log(`   GET  /properties/:id             - Single Property`);
-  console.log(`   GET  /properties/city/:city      - Properties by City`);
-  console.log(`   GET  /cities                     - All Cities with counts`);
-  console.log(`   GET  /cities/:city/types         - Property types for city`);
+  console.log(`   POST /properties/create          - Create Property`);
+  console.log(`   DELETE /properties/:id           - Delete Property`);
+  console.log(`   PATCH /properties/:id/status     - Update Property Status`);
 });

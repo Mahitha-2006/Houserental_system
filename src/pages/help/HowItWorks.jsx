@@ -1,71 +1,87 @@
-import React from "react";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import './Help.css';
 
 const HowItWorks = () => {
   const steps = [
-    {
-      title: "Search",
-      desc: "Find a property, car, or bike that matches your needs.",
-      icon: "🔍",
+    { 
+      number: 1, 
+      title: "Search for Properties", 
+      description: "Browse through our extensive collection of properties across multiple cities. Use filters to narrow down your search by location, price, amenities, and more.", 
+      icon: "🔍" 
     },
-    {
-      title: "View Details",
-      desc: "Check price, photos, owner details, and availability.",
-      icon: "📄",
+    { 
+      number: 2, 
+      title: "View Property Details", 
+      description: "Check out detailed property information including photos, amenities, house rules, cancellation policies, and genuine guest reviews.", 
+      icon: "🏠" 
     },
-    {
-      title: "Contact Owner",
-      desc: "Reach out to the owner or rental provider directly.",
-      icon: "📞",
+    { 
+      number: 3, 
+      title: "Book Your Stay", 
+      description: "Select your dates, choose the number of guests, and confirm your booking. You'll receive instant confirmation via email.", 
+      icon: "📅" 
     },
-    {
-      title: "Make Payment",
-      desc: "Complete the required payment and documentation securely.",
-      icon: "💳",
+    { 
+      number: 4, 
+      title: "Contact Host", 
+      description: "Have questions? Message the host directly through our platform. Hosts typically respond within an hour.", 
+      icon: "💬" 
     },
-    {
-      title: "Pick Up",
-      desc: "Collect your keys or vehicle and start using your rental!",
-      icon: "🚗",
-    },
+    { 
+      number: 5, 
+      title: "Enjoy Your Trip", 
+      description: "Check in, relax, and enjoy your stay. Leave a review after your trip to help other travelers.", 
+      icon: "✨" 
+    }
+  ];
+
+  const tips = [
+    { text: "Always read the house rules before booking", icon: "📋" },
+    { text: "Check cancellation policies for flexibility", icon: "🔄" },
+    { text: "Contact host if you have special requirements", icon: "📞" },
+    { text: "Verify your identity for faster check-in", icon: "✅" },
+    { text: "Leave honest reviews to help the community", icon: "⭐" }
   ];
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1
-        style={{
-          fontSize: "32px",
-          fontWeight: "bold",
-          marginBottom: "20px",
-        }}
-      >
-        How It Works
-      </h1>
+    <div className="help-page">
+      <div className="help-header">
+        <h1>How It Works</h1>
+        <p>Your complete guide to booking and staying with us</p>
+      </div>
 
-      <div style={{ marginTop: "30px" }}>
-        {steps.map((step, index) => (
-          <div
-            key={index}
-            style={{
-              marginBottom: "25px",
-              padding: "20px",
-              borderRadius: "10px",
-              background: "#f9fafb",
-              border: "1px solid #e5e5e5",
-              display: "flex",
-              alignItems: "center",
-              gap: "20px",
-            }}
-          >
-            <div style={{ fontSize: "36px" }}>{step.icon}</div>
-
-            <div>
-              <h3 style={{ marginBottom: "6px" }}>
-                {index + 1}. {step.title}
-              </h3>
-              <p style={{ color: "#555", lineHeight: "1.6" }}>{step.desc}</p>
+      <div className="how-it-works-container">
+        <div className="steps-grid">
+          {steps.map((step) => (
+            <div key={step.number} className="step-card">
+              <div className="step-number">{step.number}</div>
+              <div className="step-icon">{step.icon}</div>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
             </div>
+          ))}
+        </div>
+
+        <div className="tips-section">
+          <h2>Quick Tips for First-Time Users</h2>
+          <div className="tips-grid">
+            {tips.map((tip, index) => (
+              <div key={index} className="tip-item">
+                <span className="tip-icon">{tip.icon}</span>
+                <span>{tip.text}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        <div className="help-cta">
+          <h2>Need Immediate Assistance?</h2>
+          <p>Our support team is available 24/7 to help you with any issues or questions.</p>
+          <Link to="/contact" className="help-contact-btn">
+            Contact Support
+          </Link>
+        </div>
       </div>
     </div>
   );
